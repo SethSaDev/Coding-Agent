@@ -18,6 +18,7 @@ import os
 from pathlib import Path
 
 from agent import run_autonomous_agent
+from ui import TerminalUI
 
 
 # Configuration
@@ -75,13 +76,13 @@ Environment Variables:
 def main() -> None:
     """Main entry point."""
     args = parse_args()
+    ui = TerminalUI()
 
     # Check for API key
     if not os.environ.get("ANTHROPIC_API_KEY"):
-        print("Error: ANTHROPIC_API_KEY environment variable not set")
-        print("\nGet your API key from: https://console.anthropic.com/")
-        print("\nThen set it:")
-        print("  export ANTHROPIC_API_KEY='your-api-key-here'")
+        ui.error("ANTHROPIC_API_KEY environment variable not set")
+        ui.info("Get your API key from: https://console.anthropic.com/")
+        ui.info("Then set it: export ANTHROPIC_API_KEY='your-api-key-here'")
         return
 
     # Automatically place projects in generations/ directory unless already specified
@@ -105,10 +106,10 @@ def main() -> None:
             )
         )
     except KeyboardInterrupt:
-        print("\n\nInterrupted by user")
-        print("To resume, run the same command again")
+        ui.warning("Interrupted by user")
+        ui.info("To resume, run the same command again")
     except Exception as e:
-        print(f"\nFatal error: {e}")
+        ui.error(f"Fatal error: {e}")
         raise
 
 

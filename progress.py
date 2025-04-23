@@ -8,6 +8,8 @@ Functions for tracking and displaying progress of the autonomous coding agent.
 import json
 from pathlib import Path
 
+from ui import TerminalUI
+
 
 def count_passing_tests(project_dir: Path) -> tuple[int, int]:
     """
@@ -36,9 +38,17 @@ def count_passing_tests(project_dir: Path) -> tuple[int, int]:
         return 0, 0
 
 
-def print_session_header(session_num: int, is_initializer: bool) -> None:
+def print_session_header(
+    session_num: int,
+    is_initializer: bool,
+    ui: TerminalUI | None = None,
+) -> None:
     """Print a formatted header for the session."""
     session_type = "INITIALIZER" if is_initializer else "CODING AGENT"
+
+    if ui:
+        ui.session_header(session_num, session_type)
+        return
 
     print("\n" + "=" * 70)
     print(f"  SESSION {session_num}: {session_type}")
@@ -46,9 +56,13 @@ def print_session_header(session_num: int, is_initializer: bool) -> None:
     print()
 
 
-def print_progress_summary(project_dir: Path) -> None:
+def print_progress_summary(project_dir: Path, ui: TerminalUI | None = None) -> None:
     """Print a summary of current progress."""
     passing, total = count_passing_tests(project_dir)
+
+    if ui:
+        ui.progress_summary(passing, total)
+        return
 
     if total > 0:
         percentage = (passing / total) * 100
