@@ -37,13 +37,14 @@ BUILTIN_TOOLS = [
 ]
 
 
-def create_client(project_dir: Path, model: str) -> ClaudeSDKClient:
+def create_client(project_dir: Path, model: str, max_turns: int = 1000) -> ClaudeSDKClient:
     """
     Create a Claude Agent SDK client with multi-layered security.
 
     Args:
         project_dir: Directory for the project
         model: Claude model to use
+        max_turns: Maximum number of turns per session
 
     Returns:
         Configured ClaudeSDKClient
@@ -115,7 +116,7 @@ def create_client(project_dir: Path, model: str) -> ClaudeSDKClient:
                     HookMatcher(matcher="Bash", hooks=[bash_security_hook]),
                 ],
             },
-            max_turns=1000,
+            max_turns=max_turns,
             cwd=str(project_dir.resolve()),
             settings=str(settings_file.resolve()),  # Use absolute path
         )

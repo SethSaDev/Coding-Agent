@@ -17,10 +17,6 @@ from prompts import get_initializer_prompt, get_coding_prompt, copy_spec_to_proj
 from ui import TerminalUI
 
 
-# Configuration
-AUTO_CONTINUE_DELAY_SECONDS = 3
-
-
 async def run_agent_session(
     client: ClaudeSDKClient,
     message: str,
@@ -102,6 +98,8 @@ async def run_autonomous_agent(
     project_dir: Path,
     model: str,
     max_iterations: Optional[int] = None,
+    auto_continue_delay_seconds: int = 3,
+    max_turns: int = 1000,
 ) -> None:
     """
     Run the autonomous agent loop.
@@ -110,12 +108,16 @@ async def run_autonomous_agent(
         project_dir: Directory for the project
         model: Claude model to use
         max_iterations: Maximum number of iterations (None for unlimited)
+        auto_continue_delay_seconds: Delay between sessions in seconds
+        max_turns: Maximum turns per Claude session
     """
     ui = TerminalUI()
 
     ui.banner("AUTONOMOUS CODING AGENT DEMO", "Long-running multi-session coding harness")
     ui.info(f"Project directory: {project_dir}")
     ui.info(f"Model: {model}")
+    ui.info(f"Max turns per session: {max_turns}")
+    ui.info(f"Auto-continue delay: {auto_continue_delay_seconds}s")
     if max_iterations:
         ui.info(f"Max iterations: {max_iterations}")
     else:
@@ -159,7 +161,7 @@ async def run_autonomous_agent(
         print_session_header(iteration, is_first_run, ui=ui)
 
         # Create client (fresh context)
-        client = create_client(project_dir, model)
+        client = create_client(project_dir, model, max_turns=max_turns)
 
         # Choose prompt based on session type
         if is_first_run:
@@ -174,14 +176,14 @@ async def run_autonomous_agent(
 
         # Handle status
         if status == "continue":
-            ui.info(f"Agent will auto-continue in {AUTO_CONTINUE_DELAY_SECONDS}s...")
+            ui.info(f"Agent will auto-continue in {auto_continue_delay_seconds}s...")
             print_progress_summary(project_dir, ui=ui)
-            await asyncio.sleep(AUTO_CONTINUE_DELAY_SECONDS)
+            await asyncio.sleep(auto_continue_delay_seconds)
 
         elif status == "error":
             ui.error("Session encountered an error")
             ui.info("Will retry with a fresh session...")
-            await asyncio.sleep(AUTO_CONTINUE_DELAY_SECONDS)
+            await asyncio.sleep(auto_continue_delay_seconds)
 
         # Small delay between sessions
         if max_iterations is None or iteration < max_iterations:

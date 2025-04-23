@@ -18,14 +18,11 @@ import os
 from pathlib import Path
 
 from agent import run_autonomous_agent
+from settings import AppSettings, load_settings, resolve_project_dir
 from ui import TerminalUI
 
 
-# Configuration
-DEFAULT_MODEL = "claude-sonnet-4-5-20250929"
-
-
-def parse_args() -> argparse.Namespace:
+def parse_args(settings: AppSettings) -> argparse.Namespace:
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(
         description="Autonomous Coding Agent Demo - Long-running agent harness",
@@ -46,6 +43,10 @@ Examples:
 
 Environment Variables:
   ANTHROPIC_API_KEY    Your Anthropic API key (required)
+  AUTONOMOUS_DEFAULT_MODEL
+  AUTONOMOUS_AUTO_CONTINUE_DELAY_SECONDS
+  AUTONOMOUS_MAX_TURNS
+  AUTONOMOUS_GENERATIONS_DIR
         """,
     )
 
@@ -53,7 +54,7 @@ Environment Variables:
         "--project-dir",
         type=Path,
         default=Path("./autonomous_demo_project"),
-        help="Directory for the project (default: generations/autonomous_demo_project). Relative paths automatically placed in generations/ directory.",
+        help=f"Directory for the project (default root: {settings.generations_root}/). Relative paths are placed under this root.",
     )
 
     parser.add_argument(
@@ -64,10 +65,27 @@ Environment Variables:
     )
 
     parser.add_argument(
+        "--auto-continue-delay",
+        type=int,
+        default=settings.auto_continue_delay_seconds,
+        help=(
+            "Delay in seconds between sessions "
+            f"(default: {settings.auto_continue_delay_seconds})"
+        ),
+    )
+
+    parser.add_argument(
+        "--max-turns",
+        type=int,
+        default=settings.max_turns,
+        help=f"Max turns per agent session (default: {settings.max_turns})",
+    )
+
+    parser.add_argument(
         "--model",
         type=str,
-        default=DEFAULT_MODEL,
-        help=f"Claude model to use (default: {DEFAULT_MODEL})",
+        default=settings.default_model,
+        help=f"Claude model to use (default: {settings.default_model})",
     )
 
     return parser.parse_args()
@@ -75,7 +93,8 @@ Environment Variables:
 
 def main() -> None:
     """Main entry point."""
-    args = parse_args()
+    settings = load_settings()
+    args = parse_args(settings)
     ui = TerminalUI()
 
     # Check for API key
@@ -85,16 +104,16 @@ def main() -> None:
         ui.info("Then set it: export ANTHROPIC_API_KEY='your-api-key-here'")
         return
 
-    # Automatically place projects in generations/ directory unless already specified
-    project_dir = args.project_dir
-    if not str(project_dir).startswith("generations/"):
-        # Convert relative paths to be under generations/
-        if project_dir.is_absolute():
-            # If absolute path, use as-is
-            pass
-        else:
-            # Prepend generations/ to relative paths
-            project_dir = Path("generations") / project_dir
+    # Automatically place projects under configured generations root.
+    project_dir = resolve_project_dir(args.project_dir, settings.generations_root)
+
+    if args.auto_continue_delay < 1:
+        ui.warning("--auto-continue-delay must be >= 1; using 1 second")
+        args.auto_continue_delay = 1
+
+    if args.max_turns < 1:
+        ui.warning("--max-turns must be >= 1; using 1")
+        args.max_turns = 1
 
     # Run the agent
     try:
@@ -103,6 +122,8 @@ def main() -> None:
                 project_dir=project_dir,
                 model=args.model,
                 max_iterations=args.max_iterations,
+                auto_continue_delay_seconds=args.auto_continue_delay,
+                max_turns=args.max_turns,
             )
         )
     except KeyboardInterrupt:
