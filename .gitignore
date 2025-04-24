@@ -3,3 +3,6 @@ generations/
 
 # Log files
 logs/
+
+# Test caches
+.pytest_cache/
