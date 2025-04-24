@@ -6,3 +6,7 @@ logs/
 
 # Test caches
 .pytest_cache/
+
+# Python cache files
+__pycache__/
+*.pyc
