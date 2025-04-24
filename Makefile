@@ -1,4 +1,4 @@
-PYTHON ?= /usr/local/bin/python3
+PYTHON ?= python3
 
 .PHONY: install install-dev test test-legacy run docker-build docker-run
 
