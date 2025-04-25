@@ -12,13 +12,6 @@ tests, and containerized execution.
 This repository is designed to be portfolio-friendly: clear architecture,
 incremental development workflow, and operational tooling you can demo quickly.
 
-## Why This Project Is Showcase-Ready
-
-- Multi-session autonomous workflow with resumable progress.
-- Defense-in-depth security model for agent tool usage.
-- Structured terminal UX with session summaries and progress views.
-- Configurable runtime through CLI flags and environment variables.
-- Professional developer setup with pytest, CI, Docker, and Make targets.
 
 ## System Overview
 
