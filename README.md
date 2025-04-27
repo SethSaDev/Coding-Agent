@@ -1,6 +1,6 @@
 # Autonomous Coding Agent Harness
 
-[![CI](https://img.shields.io/github/actions/workflow/status/your-username/autonomous-coding/ci.yml?branch=main&label=CI)](#testing-and-quality)
+[![CI](https://img.shields.io/github/actions/workflow/status/SethSaDev/Coding-Agent/ci.yml?branch=main&label=CI)](#testing-and-quality)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue)](#quick-start-local)
 [![Docker](https://img.shields.io/badge/Container-Ready-informational)](#quick-start-docker)
 
@@ -155,7 +155,6 @@ generations/my_project/
 
 - Keep API keys out of commits and CI logs.
 - Add your preferred open-source license before publishing publicly.
-- Replace badge owner/repo placeholders with your actual GitHub repository.
 
 ## Acknowledgment
 
